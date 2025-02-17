@@ -23,7 +23,7 @@ export class App {
     constructor() {
         this.settings = () => {
             this.app.use(cors({
-                origin: 'https://shop-react-two.vercel.app/', // Usa el puerto del frontend si es distinto
+                origin: '*', // Usa el puerto del frontend si es distinto
                 credentials: true, // Necesario para cookies en las respuestas CORS
             })); // Enable CORS for cross-origin requests
             dotenv.config(); // Initialize dotenv for environment variables
