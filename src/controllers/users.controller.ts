@@ -3,7 +3,7 @@ import {connect} from "../db.js";
 import {User} from "../models/User.js";
 import {v4 as uuidv4} from 'uuid';
 import {format} from "date-fns";
-let bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 export async function getUsers(req: Request, res: Response){
     let db;

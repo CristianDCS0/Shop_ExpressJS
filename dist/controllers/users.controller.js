@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { connect } from "../db.js";
 import { v4 as uuidv4 } from 'uuid';
 import { format } from "date-fns";
-let bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 export function getUsers(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let db;
