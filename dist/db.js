@@ -6,6 +6,6 @@ const dbConfig = {
     user: DB.user,
     password: DB.password,
     database: DB.database,
-    connectionLimit: DB.connectionLimit
+    connectionLimit: 10
 };
 export const connect = createPool(dbConfig);

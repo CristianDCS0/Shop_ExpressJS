@@ -4,31 +4,34 @@ import {Address} from "../models/Address.js";
 import {User} from "../models/User.js";
 import {v4 as uuidv4} from "uuid";
 
+let con: any;
 export async function getAddress(req: Request, res: Response){
     try{
-        const db = await connect.getConnection();
-        const [rows] = await db.query('SELECT * FROM address');
-        res.json(rows);
-        db.release();
+        con = await connect.getConnection();
+        const {id} = req.params;
+        const [rows] = await con.query('SELECT * FROM address where id = ?', id);
+        res.json(rows[0]);
     }catch (e) {
         console.error(e);
         res.status(500).json({error: 'Error fetching addresses'});
+    }finally {
+        if (con) con.release();
     }
 }
 
 export async function postAddress(req: Request, res: Response){
     try{
+        con = await connect.getConnection();
         const address_id = uuidv4();
         const {id} = req.params;
-        const updateUser: User = {...req.body, address_id: address_id};
-        const newAddress: Address = {...req.body, id: address_id};
-        const db = await connect.getConnection();
-        await db.query('INSERT INTO address SET?', newAddress);
-        await db.query('UPDATE users SET? WHERE id =?', [updateUser, id]);
-        res.status(201).json(newAddress);
-        db.release();
+        const postAddress: Address = {...req.body, id: address_id};
+        await con.query('INSERT INTO address SET?', postAddress);
+        await con.query('UPDATE users SET address_id=? WHERE id =?', [address_id, id]);
+        res.status(201).json(postAddress);
     }catch(e){
         console.error(e);
         res.status(500).json({error: 'Error creating address'});
+    }finally {
+        if (con) con.release();
     }
 }

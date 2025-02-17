@@ -9,6 +9,7 @@ import {v4 as uuidv4} from 'uuid';
 import ProductsRoutes from "./routes/product.routes.js";
 import UserRoutes from "./routes/user.routes.js";
 import AddressRoute from "./routes/address.route.js";
+import CartRoutes from "./routes/cart.route.js";
 import {PORT} from "./config/config.js";
 
 export class App {
@@ -46,6 +47,7 @@ export class App {
         this.app.use("/api/v1/users", UserRoutes);
         this.app.use("/api/v1/products", ProductsRoutes);
         this.app.use("/api/v1/address", AddressRoute);
+        this.app.use("/api/v1/cart", CartRoutes);
         this.app.get("/", (req, res) => {
             res.send("API RESTful Node.js con Express");
         });

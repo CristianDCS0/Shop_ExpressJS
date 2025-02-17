@@ -1,19 +1,20 @@
 import {NextFunction, Request, Response} from 'express';
-import jwt, {JwtPayload} from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+dotenv.config();
+
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+    const token = req.header('Authorization')?.split(' ')[1];
+
     if (!token) {
-        res.status(401).json({ error: 'Access denied, token missing!' });
-        return;
+        return res.status(403).json({ error: 'Access denied, no authorization' });
     }
+
     try {
-        // @ts-ignore
-        req.user = jwt.verify(token, process.env.JWT_SECRET!) as string | JwtPayload; // Ahora TypeScript debe reconocer esta propiedad
+        (req as any).user = jwt.verify(token, process.env.JWT_SECRET as string);
         next();
-    } catch (err) {
-        res.status(403).json({ error: 'Invalid token' });
-        return;
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
     }
 }

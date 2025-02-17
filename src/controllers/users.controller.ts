@@ -3,98 +3,133 @@ import {connect} from "../db.js";
 import {User} from "../models/User.js";
 import {v4 as uuidv4} from 'uuid';
 import {format} from "date-fns";
-import bcrypt from "bcrypt";
+import bcrypt, {compare} from "bcrypt";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-export async function getUsers(req: Request, res: Response){
-    let db;
+dotenv.config();
+let con: any;
+
+export async function getUser(req: Request, res: Response){
     try{
-        db = await connect.getConnection();
-        const [rows] = await db.query('SELECT id, name, email, birthdate, phone, gender, role FROM users');
+        con = await connect.getConnection();
+        const {id} = req.params;
+        const [rows] = await con.query(
+            `SELECT u.id, u.name, u.email, u.birthdate, u.phone, u.gender, u.role, a.city FROM users u 
+            LEFT JOIN address a ON u.address_id = a.id WHERE u.id = ?`, [id]);
         res.status(201).json(rows);
-        console.log(rows)
     }catch (e) {
         console.error(e);
-        res.status(500).json({error: 'Error fetching users'});
+        res.status(500).json({error: 'Error fetching user'});
     }finally {
-        if (db) db.release();
+        if (con) con.release();
     }
 }
 
-export async function signup(req: Request, res: Response){
-    let db;
+export async function registerUser(req: Request, res: Response){
     try{
-        db = await connect.getConnection();
+        con = await connect.getConnection();
         const hashedPassword = bcrypt.hashSync(req.body.password, 10);
         const newUser: User = {...req.body, id: uuidv4(), password:hashedPassword, birthdate: format(req.body.birthdate, "yyyy-MM-dd")};
-        await db.query('INSERT INTO users SET?', newUser);
-
-        // @ts-ignore
-        req.session.name = newUser.name;
-        // @ts-ignore
-        req.session.role = newUser.role;
-
-        // @ts-ignore
-        res.status(201).json({message: "Registro exitoso", name: req.session.name, role: req.session.role});
+        await con.query('INSERT INTO users SET?', newUser);
+        const token = jwt.sign(
+            { id: newUser.id, name: newUser.name, role: newUser.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        );
+        res.status(201).json({message: "Registro exitoso", name: newUser.name, role: newUser.role, token});
     }catch (e){
         console.error(e);
         res.status(500).json({error: 'Error creating user'});
     }finally {
-        if (db) db.release();
+        if (con) con.release();
     }
 }
 
-export async function login(req: Request, res: Response){
-    let db;
-    try{
-        db = await connect.getConnection();
-        const {email, password} = req.body;
+export const loginUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+        con = await connect.getConnection();
+        const { email, password } = req.body;
 
         if (!email || !password) {
-            res.status(400).json({error: 'Email and password are required'});
-            console.log(res.json({error: 'Email and password are required'}));
+            res.status(400).json({ error: 'Email and password are required' });
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             res.status(400).json({ error: 'Invalid email format' });
-            console.log({error: 'Invalid email format'});
             return;
         }
 
-        const [rows]: any = await db.query('SELECT id, name, email, password, role FROM users WHERE email = ?', email);
+        const [rows]: any = await con.query('SELECT id, name, email, password, role FROM users WHERE email = ?', [email]);
+
+        if (!rows.length) {
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
+        }
+
         const user = rows[0];
         const isPasswordValid = bcrypt.compareSync(password, user.password);
-
-        if (!user || !isPasswordValid) {
-            return res.status(401).json({error: 'Invalid credentials'});
+        if (!isPasswordValid) {
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
 
-        // @ts-ignore
-        req.session.name = user.name;
-        // @ts-ignore
-        req.session.role = user.role;
-        // @ts-ignore
-        req.session.session_id = req.sessionID;
+        const token = jwt.sign(
+            { id: user.id, name: user.name, role: user.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        );
 
-        if (!req.session) {
-            return res.status(500).json({ error: 'Session not initialized' });
-        }
+        res.status(200).json({
+            message: 'Login successfully',
+            name: user.name,
+            role: user.role,
+            token
+        });
 
-        // @ts-ignore
-        res.status(200).json({message: 'Login successfully', name: req.session.name, role: req.session.role});
-    }catch (e) {
+    } catch (e) {
         console.error(e);
-        res.status(500).json({error: 'Error logging in'});
-    }finally {
-        if (db) db.release();
+        res.status(500).json({ error: 'Error logging in' });
+    } finally {
+        if (con) con.release();
     }
 }
 
-export async function logout(req: Request, res: Response) {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error logging out' });
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+    try {
+        con = await connect.getConnection();
+        const { token } = req.body;
+        const { id } = req.params;
+        if (!token) {
+            res.status(400).json({ error: 'Token is required' });
+            return;
         }
-        res.status(200).json({ message: 'Logout successful' });
-    });
+        const [rows]: any = await con.query('SELECT id, name, role FROM users WHERE id = ?', [id]);
+        const user = rows[0];
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+        const newToken = jwt.sign(
+            { id: user.id, name: user.name, role: user.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        );
+
+        res.status(200).json({
+            message: 'Token refreshed successfully',
+            token: newToken
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error refreshing token' });
+    }
+}
+
+export async function logoutUser(req: Request, res: Response) {
+    try {
+        res.status(200).json({ message: 'Logout successfully' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error logging out' });
+    }
 }

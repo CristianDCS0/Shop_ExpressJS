@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { connect } from "../db.js";
 import { v4 as uuidv4 } from 'uuid';
+let con;
 export function getProducts(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let db;
         try {
-            db = yield connect.getConnection();
-            const [rows] = yield db.query('SELECT * FROM products ORDER BY count ASC');
+            con = yield connect.getConnection();
+            const [rows] = yield con.query('SELECT * FROM products');
             res.json(rows);
         }
         catch (e) {
@@ -22,26 +22,26 @@ export function getProducts(req, res) {
             res.status(500).json({ error: 'Error fetching products' });
         }
         finally {
-            if (db)
-                db.release();
+            if (con)
+                con.release();
         }
     });
 }
 export function postProducts(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         try {
-            const db = yield connect.getConnection();
-            const [rows] = yield db.query('SELECT MAX(count) as maxCount FROM products');
-            const lastCount = ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.maxCount) || 0;
-            const newProduct = Object.assign(Object.assign({}, req.body), { id: uuidv4(), count: lastCount + 1 });
-            yield db.query('INSERT INTO products SET?', newProduct);
+            con = yield connect.getConnection();
+            const newProduct = Object.assign(Object.assign({}, req.body), { id: uuidv4() });
+            yield con.query('INSERT INTO products SET?', newProduct);
             res.status(201).json(newProduct);
-            db.release();
         }
         catch (e) {
             console.error(e);
             res.status(500).json({ error: 'Error creating product' });
+        }
+        finally {
+            if (con)
+                con.release();
         }
     });
 }

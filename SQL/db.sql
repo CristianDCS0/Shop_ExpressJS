@@ -16,6 +16,7 @@ CREATE TABLE products(
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
     category VARCHAR(255) NOT NULL,
     img VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -46,6 +47,22 @@ CREATE TABLE users(
     FOREIGN KEY (address_id) REFERENCES address(id)
 );
 
+CREATE TABLE cart (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    id_user VARCHAR(40) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE cart_items (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    id_cart VARCHAR(50) NOT NULL,
+    id_product VARCHAR(50) NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    FOREIGN KEY (id_cart) REFERENCES cart(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_product) REFERENCES products(id) ON DELETE CASCADE
+);
 
 -- add column stock to products --
 ALTER TABLE products ADD stock INT NOT NULL;

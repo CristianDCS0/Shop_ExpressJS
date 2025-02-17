@@ -1,18 +1,17 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 export function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    var _a;
+    const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
     if (!token) {
-        res.status(401).json({ error: 'Access denied, token missing!' });
-        return;
+        return res.status(403).json({ error: 'Access denied, no authorization' });
     }
     try {
-        // @ts-ignore
-        req.user = jwt.verify(token, process.env.JWT_SECRET); // Ahora TypeScript debe reconocer esta propiedad
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
     }
-    catch (err) {
-        res.status(403).json({ error: 'Invalid token' });
-        return;
+    catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
     }
 }

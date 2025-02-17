@@ -3,33 +3,32 @@ import {connect} from "../db.js";
 import {Product} from "../models/Product.js";
 import {v4 as uuidv4} from 'uuid';
 
+let con: any;
 export async function getProducts(req: Request, res: Response){
-    let db;
     try {
-        db = await connect.getConnection();
-        const [rows] = await db.query('SELECT * FROM products ORDER BY count ASC');
+        con = await connect.getConnection();
+        const [rows] = await con.query('SELECT * FROM products');
         res.json(rows);
     }catch (e) {
         console.error(e);
         res.status(500).json({error: 'Error fetching products'});
     }finally {
-        if (db) db.release();
+        if (con) con.release();
     }
 
 }
 
 export async function postProducts(req: Request, res: Response){
     try{
-        const db = await connect.getConnection();
-        const [rows]: any = await db.query('SELECT MAX(count) as maxCount FROM products');
-        const lastCount = rows[0]?.maxCount || 0;
-        const newProduct: Product = {...req.body, id: uuidv4(), count:lastCount+1};
-        await db.query('INSERT INTO products SET?', newProduct);
+        con = await connect.getConnection();
+        const newProduct: Product = {...req.body, id: uuidv4()};
+        await con.query('INSERT INTO products SET?', newProduct);
         res.status(201).json(newProduct);
-        db.release();
     }catch (e) {
         console.error(e);
         res.status(500).json({error: 'Error creating product'});
+    }finally {
+        if (con) con.release();
     }
 
 }

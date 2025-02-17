@@ -1,17 +1,15 @@
-import {Router} from 'express';
+import {Request, Response, Router} from 'express';
 const router = Router();
 import {getProducts, postProducts, updateProducts, deleteProducts, patchProduct} from "../controllers/product.controller.js";
-import {authenticateSession} from "../middlewares/authenticateSession.js";
+import {authenticateToken} from "../middlewares/authenticateToken.js";
 
 // @ts-ignore
-router.route('/').get(authenticateSession, getProducts).post(authenticateSession, postProducts);
+router.route('/').get(authenticateToken, getProducts).post(authenticateToken, postProducts);
 
-router.route('/:id')
-    .put(updateProducts)
-    .patch(patchProduct)
-    .delete(deleteProducts);
+// @ts-ignore
+router.route('/:id').put(authenticateToken, updateProducts).patch(authenticateToken, patchProduct).delete(authenticateToken, deleteProducts);
 
-router.all('/', (req, res) => {
+router.all('/', (req: Request, res: Response) => {
     res.status(405).json({ error: 'Method not allowed' });
 });
 

@@ -17,12 +17,13 @@ import { v4 as uuidv4 } from 'uuid';
 import ProductsRoutes from "./routes/product.routes.js";
 import UserRoutes from "./routes/user.routes.js";
 import AddressRoute from "./routes/address.route.js";
+import CartRoutes from "./routes/cart.route.js";
 import { PORT } from "./config/config.js";
 export class App {
     constructor() {
         this.settings = () => {
             this.app.use(cors({
-                origin: 'http://localhost:3000', // Usa el puerto del frontend si es distinto
+                origin: 'https://shop-react-two.vercel.app/', // Usa el puerto del frontend si es distinto
                 credentials: true, // Necesario para cookies en las respuestas CORS
             })); // Enable CORS for cross-origin requests
             dotenv.config(); // Initialize dotenv for environment variables
@@ -47,6 +48,7 @@ export class App {
             this.app.use("/api/v1/users", UserRoutes);
             this.app.use("/api/v1/products", ProductsRoutes);
             this.app.use("/api/v1/address", AddressRoute);
+            this.app.use("/api/v1/cart", CartRoutes);
             this.app.get("/", (req, res) => {
                 res.send("API RESTful Node.js con Express");
             });
