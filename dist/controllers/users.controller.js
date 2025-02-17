@@ -1,0 +1,117 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getUsers = getUsers;
+exports.signup = signup;
+exports.login = login;
+exports.logout = logout;
+const db_1 = require("../db");
+const uuid_1 = require("uuid");
+const date_fns_1 = require("date-fns");
+let bcrypt = require("bcrypt");
+function getUsers(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let db;
+        try {
+            db = yield db_1.connect.getConnection();
+            const [rows] = yield db.query('SELECT id, name, email, birthdate, phone, gender, role FROM users');
+            res.status(201).json(rows);
+            console.log(rows);
+        }
+        catch (e) {
+            console.error(e);
+            res.status(500).json({ error: 'Error fetching users' });
+        }
+        finally {
+            if (db)
+                db.release();
+        }
+    });
+}
+function signup(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let db;
+        try {
+            db = yield db_1.connect.getConnection();
+            const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+            const newUser = Object.assign(Object.assign({}, req.body), { id: (0, uuid_1.v4)(), password: hashedPassword, birthdate: (0, date_fns_1.format)(req.body.birthdate, "yyyy-MM-dd") });
+            yield db.query('INSERT INTO users SET?', newUser);
+            // @ts-ignore
+            req.session.name = newUser.name;
+            // @ts-ignore
+            req.session.role = newUser.role;
+            // @ts-ignore
+            res.status(201).json({ message: "Registro exitoso", name: req.session.name, role: req.session.role });
+        }
+        catch (e) {
+            console.error(e);
+            res.status(500).json({ error: 'Error creating user' });
+        }
+        finally {
+            if (db)
+                db.release();
+        }
+    });
+}
+function login(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let db;
+        try {
+            db = yield db_1.connect.getConnection();
+            const { email, password } = req.body;
+            if (!email || !password) {
+                res.status(400).json({ error: 'Email and password are required' });
+                console.log(res.json({ error: 'Email and password are required' }));
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                res.status(400).json({ error: 'Invalid email format' });
+                console.log({ error: 'Invalid email format' });
+                return;
+            }
+            const [rows] = yield db.query('SELECT id, name, email, password, role FROM users WHERE email = ?', email);
+            const user = rows[0];
+            const isPasswordValid = bcrypt.compareSync(password, user.password);
+            if (!user || !isPasswordValid) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+            // @ts-ignore
+            req.session.name = user.name;
+            // @ts-ignore
+            req.session.role = user.role;
+            // @ts-ignore
+            req.session.session_id = req.sessionID;
+            if (!req.session) {
+                return res.status(500).json({ error: 'Session not initialized' });
+            }
+            // @ts-ignore
+            res.status(200).json({ message: 'Login successfully', name: req.session.name, role: req.session.role });
+        }
+        catch (e) {
+            console.error(e);
+            res.status(500).json({ error: 'Error logging in' });
+        }
+        finally {
+            if (db)
+                db.release();
+        }
+    });
+}
+function logout(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error logging out' });
+            }
+            res.status(200).json({ message: 'Logout successful' });
+        });
+    });
+}
