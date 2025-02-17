@@ -20,8 +20,7 @@ export function getUser(req, res) {
         try {
             con = yield connect.getConnection();
             const { id } = req.params;
-            const [rows] = yield con.query(`SELECT u.id, u.name, u.email, u.birthdate, u.phone, u.gender, u.role, a.city FROM users u 
-            LEFT JOIN address a ON u.address_id = a.id WHERE u.id = ?`, [id]);
+            const [rows] = yield con.query('SELECT id, name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
             res.status(201).json(rows);
         }
         catch (e) {

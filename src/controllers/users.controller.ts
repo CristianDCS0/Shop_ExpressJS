@@ -15,7 +15,7 @@ export async function getUser(req: Request, res: Response){
         con = await connect.getConnection();
         const {id} = req.params;
         const [rows] = await con.query(
-            `SELECT id, name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?`, [id]);
+            'SELECT id, name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
         res.status(201).json(rows);
     }catch (e) {
         console.error(e);
