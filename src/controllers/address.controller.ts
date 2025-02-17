@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
-import {connect} from "../db";
-import {Address} from "../models/Address";
-import {User} from "../models/User";
+import {connect} from "../db.js";
+import {Address} from "../models/Address.js";
+import {User} from "../models/User.js";
 import {v4 as uuidv4} from "uuid";
 
 export async function getAddress(req: Request, res: Response){

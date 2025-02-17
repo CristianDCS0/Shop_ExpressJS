@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {connect} from "../db";
-import { Post } from "../models/Post"
+import {connect} from "../db.js";
+import { Post } from "../models/Post.js"
 export async function getPosts(req: Request, res: Response){
     const db = await connect.getConnection();
     const [rows] = await db.query('SELECT * FROM posts');

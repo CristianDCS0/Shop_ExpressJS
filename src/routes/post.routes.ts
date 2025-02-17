@@ -2,7 +2,7 @@ import {Router} from "express";
 const router = Router();
 
 // Importing routes
-import {getPosts, createPost, getPost, updatePost, deletePost} from "../controllers/post.controller";
+import {getPosts, createPost, getPost, updatePost, deletePost} from "../controllers/post.controller.js";
 
 router.route('/')
    .get(getPosts)

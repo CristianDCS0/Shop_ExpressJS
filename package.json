@@ -2,9 +2,11 @@
   "name": "backexp",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
     "dev": "nodemon src/index.ts --exec ts-node rs",
-    "start": "node src/index.ts"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "Cristrian Cobaxin",

@@ -1,23 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+import { createPool } from 'mysql2/promise';
+import { DB } from './config/config.js';
+const dbConfig = {
+    host: DB.host,
+    port: Number(DB.port),
+    user: DB.user,
+    password: DB.password,
+    database: DB.database,
+    connectionLimit: DB.connectionLimit
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.connect = void 0;
-const promise_1 = __importDefault(require("mysql2/promise"));
-// export async function connect() {
-//     return createPool({
-//         host: 'localhost',
-//         user: 'root',
-//         password: 'root',
-//         database: 'express_react',
-//         connectionLimit: 10
-//     });
-// }
-exports.connect = promise_1.default.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'express_react',
-    connectionLimit: 10
-});
+export const connect = createPool(dbConfig);

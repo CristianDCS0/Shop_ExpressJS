@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticateSession = authenticateSession;
-function authenticateSession(req, res, next) {
+export function authenticateSession(req, res, next) {
     // @ts-ignore
     if (!req.session.session_id) {
         // @ts-ignore

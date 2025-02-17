@@ -1,7 +1,7 @@
 import {Router} from 'express';
 const router = Router();
-import {getProducts, postProducts, updateProducts, deleteProducts, patchProduct} from "../controllers/product.controller";
-import {authenticateSession} from "../middlewares/authenticateSession";
+import {getProducts, postProducts, updateProducts, deleteProducts, patchProduct} from "../controllers/product.controller.js";
+import {authenticateSession} from "../middlewares/authenticateSession.js";
 
 // @ts-ignore
 router.route('/').get(authenticateSession, getProducts).post(authenticateSession, postProducts);

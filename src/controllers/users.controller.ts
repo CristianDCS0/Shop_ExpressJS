@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {connect} from "../db";
-import {User} from "../models/User";
+import {connect} from "../db.js";
+import {User} from "../models/User.js";
 import {v4 as uuidv4} from 'uuid';
 import {format} from "date-fns";
 let bcrypt = require("bcrypt");

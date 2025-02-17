@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {login, logout, signup} from "../controllers/users.controller";
+import {login, logout, signup} from "../controllers/users.controller.js";
 
 const router = Router();
 

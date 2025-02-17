@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {connect} from "../db";
-import {Product} from "../models/Product";
+import {connect} from "../db.js";
+import {Product} from "../models/Product.js";
 import {v4 as uuidv4} from 'uuid';
 
 export async function getProducts(req: Request, res: Response){

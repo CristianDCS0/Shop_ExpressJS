@@ -1,14 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const router = (0, express_1.Router)();
+import { Router } from "express";
+const router = Router();
 // Importing routes
-const post_controller_1 = require("../controllers/post.controller");
+import { getPosts, createPost, getPost, updatePost, deletePost } from "../controllers/post.controller.js";
 router.route('/')
-    .get(post_controller_1.getPosts)
-    .post(post_controller_1.createPost);
+    .get(getPosts)
+    .post(createPost);
 router.route('/:id')
-    .get(post_controller_1.getPost)
-    .put(post_controller_1.updatePost)
-    .delete(post_controller_1.deletePost);
-exports.default = router;
+    .get(getPost)
+    .put(updatePost)
+    .delete(deletePost);
+export default router;

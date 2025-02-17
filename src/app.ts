@@ -6,10 +6,10 @@ import session from "express-session";
 import {v4 as uuidv4} from 'uuid';
 
 // Routes
-import ProductsRoutes from "./routes/product.routes";
-import UserRoutes from "./routes/user.routes";
-import AddressRoute from "./routes/address.route";
-import {PORT} from "./config/config";
+import ProductsRoutes from "./routes/product.routes.js";
+import UserRoutes from "./routes/user.routes.js";
+import AddressRoute from "./routes/address.route.js";
+import {PORT} from "./config/config.js";
 
 export class App {
     private app: Application;

@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,20 +7,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUsers = getUsers;
-exports.signup = signup;
-exports.login = login;
-exports.logout = logout;
-const db_1 = require("../db");
-const uuid_1 = require("uuid");
-const date_fns_1 = require("date-fns");
+import { connect } from "../db.js";
+import { v4 as uuidv4 } from 'uuid';
+import { format } from "date-fns";
 let bcrypt = require("bcrypt");
-function getUsers(req, res) {
+export function getUsers(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let db;
         try {
-            db = yield db_1.connect.getConnection();
+            db = yield connect.getConnection();
             const [rows] = yield db.query('SELECT id, name, email, birthdate, phone, gender, role FROM users');
             res.status(201).json(rows);
             console.log(rows);
@@ -36,13 +30,13 @@ function getUsers(req, res) {
         }
     });
 }
-function signup(req, res) {
+export function signup(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let db;
         try {
-            db = yield db_1.connect.getConnection();
+            db = yield connect.getConnection();
             const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-            const newUser = Object.assign(Object.assign({}, req.body), { id: (0, uuid_1.v4)(), password: hashedPassword, birthdate: (0, date_fns_1.format)(req.body.birthdate, "yyyy-MM-dd") });
+            const newUser = Object.assign(Object.assign({}, req.body), { id: uuidv4(), password: hashedPassword, birthdate: format(req.body.birthdate, "yyyy-MM-dd") });
             yield db.query('INSERT INTO users SET?', newUser);
             // @ts-ignore
             req.session.name = newUser.name;
@@ -61,11 +55,11 @@ function signup(req, res) {
         }
     });
 }
-function login(req, res) {
+export function login(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let db;
         try {
-            db = yield db_1.connect.getConnection();
+            db = yield connect.getConnection();
             const { email, password } = req.body;
             if (!email || !password) {
                 res.status(400).json({ error: 'Email and password are required' });
@@ -105,7 +99,7 @@ function login(req, res) {
         }
     });
 }
-function logout(req, res) {
+export function logout(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         req.session.destroy((err) => {
             if (err) {
