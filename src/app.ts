@@ -23,25 +23,16 @@ export class App {
     settings = () => {
         this.app.use(cors({
             origin: '*', // Usa el puerto del frontend si es distinto
-            credentials: true, // Necesario para cookies en las respuestas CORS
-        })); // Enable CORS for cross-origin requests
+            // credentials: true, Necesario para cookies en las respuestas CORS
+            methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        }));
         dotenv.config(); // Initialize dotenv for environment variables
     };
     middlewares = () => {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
         this.app.use(morgan("dev")); // Enable logging for development environment
-        this.app.use(session({
-            genid: function() {
-                return uuidv4() // use uuid for session IDs
-            },
-            secret: 'JoselynElizabethEstradaBlanco10/04/2003', // Secreto para firmar la sesión
-            resave: false,
-            saveUninitialized: true,
-            cookie: {
-                secure: false, // Si estás usando http (no https), debe ser false
-            }
-        }));
     };
     routes = () => {
         this.app.use("/api/v1/users", UserRoutes);
