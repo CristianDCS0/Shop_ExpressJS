@@ -22,8 +22,8 @@ export class App {
     }
     settings = () => {
         this.app.use(cors({
-            origin: '*', // Usa el puerto del frontend si es distinto
-            // credentials: true, Necesario para cookies en las respuestas CORS
+            origin: 'http://localhost:3000', // Usa el host del frontend si es distinto si utilza cookies
+            credentials: true, // Necesario para cookies en las respuestas CORS
             methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
             allowedHeaders: ['Content-Type', 'Authorization'],
         }));

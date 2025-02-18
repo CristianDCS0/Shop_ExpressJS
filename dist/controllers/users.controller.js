@@ -20,7 +20,7 @@ export function getUser(req, res) {
         try {
             con = yield connect.getConnection();
             const { id } = req.params;
-            const [rows] = yield con.query('SELECT id, name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
+            const [rows] = yield con.query('SELECT name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
             res.status(201).json(rows);
         }
         catch (e) {
@@ -33,26 +33,24 @@ export function getUser(req, res) {
         }
     });
 }
-export function registerUser(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            con = yield connect.getConnection();
-            const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-            const newUser = Object.assign(Object.assign({}, req.body), { id: uuidv4(), password: hashedPassword, birthdate: format(req.body.birthdate, "yyyy-MM-dd") });
-            yield con.query('INSERT INTO users SET?', newUser);
-            const token = jwt.sign({ id: newUser.id, name: newUser.name, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
-            res.status(201).json({ message: "Registro exitoso", name: newUser.name, role: newUser.role, token });
-        }
-        catch (e) {
-            console.error(e);
-            res.status(500).json({ error: 'Error creating user' });
-        }
-        finally {
-            if (con)
-                con.release();
-        }
-    });
-}
+export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        con = yield connect.getConnection();
+        const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+        const newUser = Object.assign(Object.assign({}, req.body), { id: uuidv4(), password: hashedPassword, birthdate: format(req.body.birthdate, "yyyy-MM-dd") });
+        yield con.query('INSERT INTO users SET?', newUser);
+        const token = jwt.sign({ id: newUser.id, name: newUser.name, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
+        res.status(201).json({ message: "Registro exitoso", id: newUser.id, name: newUser.name, role: newUser.role, token });
+    }
+    catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error creating user' });
+    }
+    finally {
+        if (con)
+            con.release();
+    }
+});
 export const loginUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         con = yield connect.getConnection();
@@ -78,10 +76,7 @@ export const loginUsers = (req, res) => __awaiter(void 0, void 0, void 0, functi
         }
         const token = jwt.sign({ id: user.id, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
         res.status(200).json({
-            message: 'Login successfully',
-            name: user.name,
-            role: user.role,
-            token
+            message: 'Login successfully', id: user.id, name: user.name, role: user.role, token
         });
     }
     catch (e) {

@@ -81,11 +81,7 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
         );
 
         res.status(200).json({
-            message: 'Login successfully',
-            id: user.id,
-            name: user.name,
-            role: user.role,
-            token
+            message: 'Login successfully', id: user.id, name: user.name, role: user.role, token
         });
 
     } catch (e) {

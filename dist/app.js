@@ -11,8 +11,6 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-import session from "express-session";
-import { v4 as uuidv4 } from 'uuid';
 // Routes
 import ProductsRoutes from "./routes/product.routes.js";
 import UserRoutes from "./routes/user.routes.js";
@@ -23,26 +21,17 @@ export class App {
     constructor() {
         this.settings = () => {
             this.app.use(cors({
-                origin: '*', // Usa el puerto del frontend si es distinto
+                origin: 'http://localhost:3000', // Usa el host del frontend si es distinto si utilza cookies
                 credentials: true, // Necesario para cookies en las respuestas CORS
-            })); // Enable CORS for cross-origin requests
+                methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+                allowedHeaders: ['Content-Type', 'Authorization'],
+            }));
             dotenv.config(); // Initialize dotenv for environment variables
         };
         this.middlewares = () => {
             this.app.use(express.json());
             this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
             this.app.use(morgan("dev")); // Enable logging for development environment
-            this.app.use(session({
-                genid: function () {
-                    return uuidv4(); // use uuid for session IDs
-                },
-                secret: 'JoselynElizabethEstradaBlanco10/04/2003', // Secreto para firmar la sesión
-                resave: false,
-                saveUninitialized: true,
-                cookie: {
-                    secure: false, // Si estás usando http (no https), debe ser false
-                }
-            }));
         };
         this.routes = () => {
             this.app.use("/api/v1/users", UserRoutes);
