@@ -15,7 +15,7 @@ export async function getUser(req: Request, res: Response){
         con = await connect.getConnection();
         const {id} = req.params;
         const [rows] = await con.query(
-            'SELECT id, name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
+            'SELECT name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
         res.status(201).json(rows);
     }catch (e) {
         console.error(e);
@@ -25,7 +25,7 @@ export async function getUser(req: Request, res: Response){
     }
 }
 
-export async function registerUser(req: Request, res: Response){
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
     try{
         con = await connect.getConnection();
         const hashedPassword = bcrypt.hashSync(req.body.password, 10);
@@ -36,7 +36,7 @@ export async function registerUser(req: Request, res: Response){
             process.env.JWT_SECRET as string,
             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
         );
-        res.status(201).json({message: "Registro exitoso", name: newUser.name, role: newUser.role, token});
+        res.status(201).json({message: "Registro exitoso", id: newUser.id, name: newUser.name, role: newUser.role, token});
     }catch (e){
         console.error(e);
         res.status(500).json({error: 'Error creating user'});
@@ -82,6 +82,7 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
 
         res.status(200).json({
             message: 'Login successfully',
+            id: user.id,
             name: user.name,
             role: user.role,
             token
