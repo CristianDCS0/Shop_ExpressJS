@@ -21,7 +21,9 @@ export function getUser(req, res) {
             con = yield connect.getConnection();
             const { id } = req.params;
             const [rows] = yield con.query('SELECT name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
-            res.status(201).json(rows);
+            const user = rows[0];
+            res.status(201).json({ name: user.name, email: user.email, birthdate: user.birthdate,
+                phone: user.phone, gender: user.gender, role: user.role, address_id: user.address_id });
         }
         catch (e) {
             console.error(e);
