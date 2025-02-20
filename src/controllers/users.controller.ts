@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000,
         });
         res.status(201).json({message: "Registro exitoso"});
@@ -105,7 +105,7 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000,
         });
 

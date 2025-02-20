@@ -57,7 +57,7 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000,
         });
         res.status(201).json({ message: "Registro exitoso" });
@@ -98,7 +98,7 @@ export const loginUsers = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000,
         });
         res.status(200).json({ message: 'Login successfully' });
