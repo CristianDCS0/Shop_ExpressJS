@@ -22,8 +22,8 @@ export class App {
     }
     settings = () => {
         this.app.use(cors({
-            origin: 'http://localhost:5173', // Usa el host del frontend si es distinto utiliza cookies
-            credentials: true, // Necesario para cookies en las respuestas CORS
+            origin: 'http://localhost:5173',
+            credentials: true,
         }));
         dotenv.config(); // Initialize dotenv for environment variables
     };

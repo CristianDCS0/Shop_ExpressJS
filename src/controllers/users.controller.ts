@@ -110,10 +110,12 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
         });
 
         res.status(200).json({message: 'Login successfully'});
-        if (con) con.release();
+        
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error logging in' });
+    }finally {
+        if (con) con.release();
     }
 }
 

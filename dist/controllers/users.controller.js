@@ -102,12 +102,14 @@ export const loginUsers = (req, res) => __awaiter(void 0, void 0, void 0, functi
             maxAge: 60 * 60 * 1000,
         });
         res.status(200).json({ message: 'Login successfully' });
-        if (con)
-            con.release();
     }
     catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error logging in' });
+    }
+    finally {
+        if (con)
+            con.release();
     }
 });
 export const refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
