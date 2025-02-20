@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 export function authenticateToken(req, res, next) {
     var _a;
-    const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+    const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
     if (!token) {
-        return res.status(403).json({ error: 'Access denied, no authorization' });
+        return res.status(403).json({ error: 'Access denied' });
     }
     try {
         req.user = jwt.verify(token, process.env.JWT_SECRET);

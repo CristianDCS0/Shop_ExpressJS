@@ -2,7 +2,7 @@ import express, {Application} from "express";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-import session from "express-session";
+import cookieParser from 'cookie-parser';
 import {v4 as uuidv4} from 'uuid';
 
 // Routes
@@ -22,15 +22,14 @@ export class App {
     }
     settings = () => {
         this.app.use(cors({
-            origin: 'http://localhost:3000', // Usa el host del frontend si es distinto si utilza cookies
+            origin: 'http://localhost:3000', // Usa el host del frontend si es distinto utiliza cookies
             credentials: true, // Necesario para cookies en las respuestas CORS
-            methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-            allowedHeaders: ['Content-Type', 'Authorization'],
         }));
         dotenv.config(); // Initialize dotenv for environment variables
     };
     middlewares = () => {
         this.app.use(express.json());
+        this.app.use(cookieParser());
         this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
         this.app.use(morgan("dev")); // Enable logging for development environment
     };

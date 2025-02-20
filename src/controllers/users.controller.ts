@@ -9,16 +9,30 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 let con: any;
+const jwtSecret = String(process.env.JWT_SECRET);
+const jwtExpiresIn = String(process.env.JWT_EXPIRES_IN);
+const nodeEnv = String(process.env.NODE_ENV);
 
-export async function getUser(req: Request, res: Response){
+export const profileUser = async(req: Request, res: Response): Promise<void> => {
     try{
         con = await connect.getConnection();
-        const {id} = req.params;
-        const [rows] = await con.query(
-            'SELECT name, email, birthdate, phone, gender, role, address_id FROM users WHERE id = ?', [id]);
-        const user = rows[0];
-        res.status(201).json({ name: user.name, email: user.email, birthdate: user.birthdate,
-            phone: user.phone, gender: user.gender, role: user.role, address_id: user.address_id});
+        const token = req.cookies?.token;
+        if (!token) {
+            res.status(401).json({ error: 'No autorizado' });
+        }
+
+        jwt.verify(token, jwtSecret, async (err: any, user: any) => {
+            if (err) {
+                return res.status(403).json({error: 'Token inválido'});
+            }
+            const [rows] = await con.query('SELECT email, birthdate, phone, gender, address_id FROM users WHERE id = ?', [user.id]);
+            const u = rows[0];
+            res.json({
+                name: user.name, email: u.email, birthdate: u.birthdate,
+                phone: u.phone, gender: u.gender, role: user.role, address_id: u.address_id
+            });
+        });
+
     }catch (e) {
         console.error(e);
         res.status(500).json({error: 'Error fetching user'});
@@ -35,10 +49,16 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         await con.query('INSERT INTO users SET?', newUser);
         const token = jwt.sign(
             { id: newUser.id, name: newUser.name, role: newUser.role },
-            process.env.JWT_SECRET as string,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            jwtSecret,
+            { expiresIn: jwtExpiresIn || '1h' }
         );
-        res.status(201).json({message: "Registro exitoso", id: newUser.id, name: newUser.name, role: newUser.role, token});
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: nodeEnv === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000,
+        });
+        res.status(201).json({message: "Registro exitoso"});
     }catch (e){
         console.error(e);
         res.status(500).json({error: 'Error creating user'});
@@ -78,45 +98,28 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
 
         const token = jwt.sign(
             { id: user.id, name: user.name, role: user.role },
-            process.env.JWT_SECRET as string,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            jwtSecret,
+            { expiresIn: jwtExpiresIn || '1h' }
         );
 
-        res.status(200).json({
-            message: 'Login successfully', id: user.id, name: user.name, role: user.role, token
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: nodeEnv === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000,
         });
 
+        res.status(200).json({message: 'Login successfully'});
+        if (con) con.release();
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error logging in' });
-    } finally {
-        if (con) con.release();
     }
 }
 
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
-        con = await connect.getConnection();
-        const { token } = req.body;
-        const { id } = req.params;
-        if (!token) {
-            res.status(400).json({ error: 'Token is required' });
-            return;
-        }
-        const [rows]: any = await con.query('SELECT id, name, role FROM users WHERE id = ?', [id]);
-        const user = rows[0];
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-        const newToken = jwt.sign(
-            { id: user.id, name: user.name, role: user.role },
-            process.env.JWT_SECRET as string,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
-        );
-
-        res.status(200).json({
-            message: 'Token refreshed successfully',
-            token: newToken
-        });
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error refreshing token' });
@@ -125,7 +128,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
 export async function logoutUser(req: Request, res: Response) {
     try {
-        res.status(200).json({ message: 'Logout successfully' });
+        res.clearCookie('token');
+        res.json({ message: 'Logout exitoso' });
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error logging out' });

@@ -5,10 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
-    const token = req.header('Authorization')?.split(' ')[1];
+    const token = req.cookies?.token;
 
     if (!token) {
-        return res.status(403).json({ error: 'Access denied, no authorization' });
+        return res.status(403).json({ error: 'Access denied' });
     }
 
     try {
