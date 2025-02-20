@@ -17,7 +17,7 @@ dotenv.config();
 let con;
 const jwtSecret = String(process.env.JWT_SECRET);
 const jwtExpiresIn = String(process.env.JWT_EXPIRES_IN);
-const nodeEnv = String(process.env.NODE_ENV);
+const nodeEnv = Boolean(process.env.NODE_ENV);
 export const profileUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -56,7 +56,7 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         const token = jwt.sign({ id: newUser.id, name: newUser.name, role: newUser.role }, jwtSecret, { expiresIn: jwtExpiresIn || '1h' });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: nodeEnv === 'production',
+            secure: nodeEnv,
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000,
         });
@@ -97,7 +97,7 @@ export const loginUsers = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const token = jwt.sign({ id: user.id, name: user.name, role: user.role }, jwtSecret, { expiresIn: jwtExpiresIn || '1h' });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: nodeEnv === 'production',
+            secure: nodeEnv,
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000,
         });
