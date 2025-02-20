@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 60 * 60 * 1000,
         });
         res.status(201).json({message: "Registro exitoso"});
@@ -105,12 +105,11 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
         res.cookie('token', token, {
             httpOnly: true,
             secure: nodeEnv,
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 60 * 60 * 1000,
         });
 
         res.status(200).json({message: 'Login successfully'});
-        
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'Error logging in' });
