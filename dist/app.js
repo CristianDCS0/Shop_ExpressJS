@@ -20,18 +20,18 @@ import CartRoutes from "./routes/cart.route.js";
 import { PORT } from "./config/config.js";
 export class App {
     constructor() {
+        this.middlewares = () => {
+            this.app.use(express.json());
+            this.app.use(cookieParser());
+            this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
+            this.app.use(morgan("dev")); // Enable logging for development environment
+        };
         this.settings = () => {
             this.app.use(cors({
                 origin: 'http://localhost:5173',
                 credentials: true,
             }));
             dotenv.config(); // Initialize dotenv for environment variables
-        };
-        this.middlewares = () => {
-            this.app.use(express.json());
-            this.app.use(cookieParser());
-            this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
-            this.app.use(morgan("dev")); // Enable logging for development environment
         };
         this.routes = () => {
             this.app.use("/api/v1/users", UserRoutes);
@@ -48,8 +48,8 @@ export class App {
             });
         });
         this.app = express();
-        this.settings();
         this.middlewares();
+        this.settings();
         this.routes();
     }
 }

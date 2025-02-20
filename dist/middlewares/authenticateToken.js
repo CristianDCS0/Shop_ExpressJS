@@ -8,7 +8,7 @@ export function authenticateToken(req, res, next) {
         return res.status(403).json({ error: 'Access denied' });
     }
     try {
-        req.user = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = jwt.verify(token, String(process.env.JWT_SECRET));
         next();
     }
     catch (error) {

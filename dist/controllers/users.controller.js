@@ -17,7 +17,7 @@ dotenv.config();
 let con;
 const jwtSecret = String(process.env.JWT_SECRET);
 const jwtExpiresIn = String(process.env.JWT_EXPIRES_IN);
-const nodeEnv = Boolean(process.env.NODE_ENV);
+const nodeEnv = process.env.NODE_ENV === 'production';
 export const profileUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {

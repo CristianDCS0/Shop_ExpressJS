@@ -11,7 +11,7 @@ dotenv.config();
 let con: any;
 const jwtSecret = String(process.env.JWT_SECRET);
 const jwtExpiresIn = String(process.env.JWT_EXPIRES_IN);
-const nodeEnv = Boolean(process.env.NODE_ENV);
+const nodeEnv = process.env.NODE_ENV === 'production';
 
 export const profileUser = async(req: Request, res: Response): Promise<void> => {
     try{

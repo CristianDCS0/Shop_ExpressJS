@@ -12,7 +12,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
     }
 
     try {
-        (req as any).user = jwt.verify(token, process.env.JWT_SECRET as string);
+        (req as any).user = jwt.verify(token, String(process.env.JWT_SECRET));
         next();
     } catch (error) {
         return res.status(401).json({ error: 'Invalid token' });

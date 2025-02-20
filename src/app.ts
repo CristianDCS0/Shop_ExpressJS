@@ -16,10 +16,17 @@ export class App {
     private app: Application;
     constructor() {
         this.app = express();
-        this.settings();
         this.middlewares();
+        this.settings();
         this.routes();
     }
+    middlewares = () => {
+        this.app.use(express.json());
+        this.app.use(cookieParser());
+        this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
+        this.app.use(morgan("dev")); // Enable logging for development environment
+    };
+
     settings = () => {
         this.app.use(cors({
             origin: 'http://localhost:5173',
@@ -27,12 +34,7 @@ export class App {
         }));
         dotenv.config(); // Initialize dotenv for environment variables
     };
-    middlewares = () => {
-        this.app.use(express.json());
-        this.app.use(cookieParser());
-        this.app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded bodies in requests
-        this.app.use(morgan("dev")); // Enable logging for development environment
-    };
+
     routes = () => {
         this.app.use("/api/v1/users", UserRoutes);
         this.app.use("/api/v1/products", ProductsRoutes);
