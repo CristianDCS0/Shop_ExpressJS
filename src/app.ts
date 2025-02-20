@@ -22,7 +22,7 @@ export class App {
     }
     settings = () => {
         this.app.use(cors({
-            origin: 'http://localhost:3000', // Usa el host del frontend si es distinto utiliza cookies
+            origin: 'https://shop-react-two.vercel.app', // Usa el host del frontend si es distinto utiliza cookies
             credentials: true, // Necesario para cookies en las respuestas CORS
         }));
         dotenv.config(); // Initialize dotenv for environment variables
