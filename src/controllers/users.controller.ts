@@ -11,7 +11,7 @@ dotenv.config();
 let con: any;
 const jwtSecret = String(process.env.JWT_SECRET);
 const jwtExpiresIn = String(process.env.JWT_EXPIRES_IN);
-const nodeEnv = String(process.env.NODE_ENV);
+const nodeEnv = Boolean(process.env.NODE_ENV);
 
 export const profileUser = async(req: Request, res: Response): Promise<void> => {
     try{
@@ -54,7 +54,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         );
         res.cookie('token', token, {
             httpOnly: true,
-            secure: nodeEnv === 'production',
+            secure: nodeEnv,
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000,
         });
@@ -104,7 +104,7 @@ export const loginUsers = async (req: Request, res: Response): Promise<void> => 
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: nodeEnv === 'production',
+            secure: nodeEnv,
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000,
         });
